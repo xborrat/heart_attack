@@ -62,7 +62,7 @@ heart_sel$exng<-factor(heart_sel$exng)
 
 # output Value 0: < 50% diameter narrowing 
 # output Value 1: > 50% diameter narrowing 
-heart_sel$output<-factor(heart_sel$output)
+#heart_sel$output<-factor(heart_sel$output)
 
 #Funció resum del dataset.
 summary(heart_sel)
@@ -118,8 +118,8 @@ heart_sel$chol[heart_sel$chol >= min(col_outliers)] <- NA
 
 # Imputem valors nous utilitzan KNN.
 
-heart_sel <- kNN(heart_sel, variable= "trtbps", k = 11)
-heart_sel <- kNN(heart_sel, variable= "chol", k = 11)
+heart_sel<- kNN(heart_sel, variable= "trtbps", k = 11)
+heart_sel<- kNN(heart_sel, variable= "chol", k = 11)
 
 
 ```
@@ -233,22 +233,6 @@ Conclusió: Les distribucions de les variables continues només la presió arter
 
 # Comparació de les edats pels diferents sexes.
 
-mitges<- with(heart_sel,tapply(chol,sex,mean))
-desvest<-with(heart_sel,tapply(chol,sex,sd))
-n<-with(heart_sel,tapply(chol,sex,length))
-
-SE.1 <-  desvest[1] / sqrt(n[1])               
-SE.2 <-  desvest[2] / sqrt(n[2])  
-SE      <- sqrt( SE.1^2 + SE.2^2)                        
-z       <- (mitges[1] - mitges[2]) / SE
-P.z     <- pnorm(z, lower.tail = TRUE) 
-```
-
-
-
-
-
-```{r}
 boxplot(heart_sel$age ~ heart_sel$sex, main="Age vs gender",
         xlab="Gender: 0= Female, 1 = Male", ylab="Age")
 
@@ -264,7 +248,10 @@ P.z     <- pnorm(z, lower.tail = FALSE)
 print(SE)
 print(z)
 print(P.z)
+
+
 ```
+
 
 
 
@@ -310,13 +297,17 @@ print(SE)
 print(z)
 print(P.z)
 ```
+
+
 ```{r}
 
 # regressió logistica
 
-mod1 <- glm(output ~ ., family = binomial, data = heart_sel)
+
+mod1 <- glm(output ~ age+sex+trtbps+chol+fbs+restecg+exng+caa, family = binomial, data = heart_sel)
 summary(mod1)
 ```
+
 
 ```{r}
 
