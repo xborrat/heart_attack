@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 
 # title "Pràctica_2"
 ## Authors
@@ -9,8 +14,6 @@ output: pdf_document
 
 LINKS a les fonts de les dades:
 
-
-https://archive.ics.uci.edu/ml/datasets/Heart+Disease
 
 https://www.kaggle.com/datasets/rashikrahmanpritom/heart-attack-analysis-prediction-dataset
 
@@ -57,6 +60,8 @@ heart_sel$fbs<-factor(heart_sel$fbs)
 #Value 0: normal
 #Value 1: having ST-T wave abnormality
 heart_sel$restecg<-factor(heart_sel$restecg)
+
+
 heart_sel$exng<-factor(heart_sel$exng)
 
 
@@ -127,7 +132,8 @@ heart_sel<- kNN(heart_sel, variable= "chol", k = 11)
 ### 4. Anàlisi de les dades.
 4.1. Selecció dels grups de dades que es volen analitzar/comparar (p. e., si es volen comparar grups de dades, quins són aquests grups i quins tipus d’anàlisi s’aplicaran?).
 **Objectiu principal**:
-Amb aquest conjunt de dades volem saber si podem generar un model predictiu per estimar el diagnòstic de malaltia coronaria a partir de dades biomètriques, analítiques i de tests d'estrés. 
+
+Amb aquest conjunt de dades volem generar un model predictiu per estimar el diagnòstic de malaltia coronaria i veure la importancia relativa en el seu diagnòstic de dades biomètriques, analítiques i de tests d'estrés. 
 
 Regressio logística per predir la malaltia coronaria utilitzant com a variables independents:
 -Edat(Age)
@@ -140,7 +146,8 @@ Regressio logística per predir la malaltia coronaria utilitzant com a variables
 -Nombre d'arteries coronaries calcificades. (output)
 
 **Objectiu Secundari**
-Abans però volem estudiar el comportament d'algunes variables entre elles:
+
+Abans però estudiarem el comportament d'algunes variables per entendre millor el comporatament de les dades.  Entre elles:
 
 1.-Relació entre dolor anginós en exercici (exng) i presentar elevació del segment ST(restecg) com a marcador d'isquèmia miocàrdica. 
 Matriu de confusió:
@@ -220,15 +227,16 @@ fligner.test(chol ~ sex, data = heart_sel)
 ```
 Conclusió: Les distribucions de les variables continues només la presió arterial en repós presenta homocedasticitat.
 
+3.- Comparar si homes i dones tenen un nivell de colesterol i pressió arterial igual o diferent. 
+
+
+Nota important: Cap de les variables continues té criteris per poder aplicar la  t-student perquè no partim de distribucions normals i dues d'elles compleixen el criteri d'homocedasticitat. 
+
+Per tant utilitzarem el teorema del límit central per poder fer una aproximació paramètrica. El teorema del límit central ens deixa assumir normalitat enla distribució de les mitges mostrals obtingudes de poblacions grans(>30 individus.)
+
 ```{r}
-# 3.- Comparar si homes i dones tenen un nivell de colesterol i pressió arterial igual o diferent. 
 
-# Previament verificar si l'edat d'homes i dones d'aquesta cohort es comparable. 
-
-# Cap de les variables continues té criteris per poder aplicar el test t-student perquè no partim de distribucions normals i tampoc dues d'elles compleixen el criteri d'homocedasticitat. 
-
-
-# Pel teorema del límit central podem assumir normalitat de la distribució de les mitges mostrals.
+# Previament verificarem si l'edat d'homes i dones d'aquesta cohort es comparable i per tant les diferències que estudiarem posteriorment amb el sexe no siguin degudes a que els homes i dones tenen edats diferents.
 
 
 # Comparació de les edats pels diferents sexes.
@@ -245,17 +253,24 @@ SE.2 <-  desvest[2] / sqrt(n[2])
 SE      <- sqrt( SE.1^2 + SE.2^2)                        
 z       <- (mitges[1] - mitges[2]) / SE
 P.z     <- pnorm(z, lower.tail = FALSE) 
+print("Desviació estandard")
 print(SE)
+print("Diferencia de mitges entre grups")
+print(mitges[1]-mitges[2])
+print("estadístic Z")
 print(z)
+print("probabilitat d'equivocar-nos en rebutjar siguent certa la hipotesis nul·la")
 print(P.z)
-
-
 ```
-
+Resposta conclusions: El test ens assegura que si rebutgem la hipotesis nul.la i per tant assumim que l'edat d'homes i dones és diferent en la població d'origen, tenim molt poques probabilitats d'equivocar-nos.
+Per tant en els anàlisi posteriors d'aquesta secció hem de tenir en compte que una variable confusora pot ser l'edat ja que està distribuida de manera diferent entre homes i dones. 
 
 
 
 ```{r}
+# Diferencies en nivells de colesterol entre homes i dones. 
+
+
 boxplot(heart_sel$chol ~ heart_sel$sex, main="Colesterol vs gender",
         xlab="Gender: 0= Female, 1 = Male", ylab="Colesterol level in blood")
 
@@ -274,12 +289,16 @@ print("Diferencia de mitges entre grups")
 print(mitges[1]-mitges[2])
 print("estadístic Z")
 print(z)
-print("probabilitat de rebutjar siguent certa la hipotesis nul·la")
+print("probabilitat d'equivocar-nos en rebutjar siguent certa la hipotesis nul·la")
 print(P.z)
 
 ```
+Resposta i conclusions: El test ens diu que podem rebutjar la igualtat de nivells de colesterol entre homes i dones. Però com hem comentat en l'apartat anterior l'edat podria contribuir al nivell de colesterol més alt en les dones perque en el dataset son més grans. 
+
 
 ```{r}
+# Diferencies en nivells en presió arterial en repòs entre homes i dones. 
+
 boxplot(heart_sel$trtbps ~ heart_sel$sex, main="Blood resting pressure vs gender",
         xlab="Gender: 0= Female, 1 = Male", ylab="Blood resting pressure")
 
@@ -293,22 +312,33 @@ SE      <- sqrt( SE.1^2 + SE.2^2)
 z       <- (mitges[1] - mitges[2]) / SE
 P.z     <- pnorm(z, lower.tail = FALSE) 
 
+print("Desviació estandard")
 print(SE)
+print("Diferencia de mitges entre grups")
+print(mitges[1]-mitges[2])
+print("estadístic Z")
 print(z)
+print("probabilitat d'equivocar-nos en rebutjar siguent certa la hipotesis nul·la")
 print(P.z)
-```
 
+```
+Resposta: En aquest test no hi ha diferencies entre els nivells de pressió arterial en repòs. 
+
+
+**Regressió Logística**
 
 ```{r}
 
 # regressió logistica
 
+# canvi d'etiqueta per millorar llegibilitat de la regressió
+levels(heart_sel$exng) <-c('no_pain','pain') 
+levels(heart_sel$sex) <-c('female','male')
+
 
 mod1 <- glm(output ~ age+sex+trtbps+chol+fbs+restecg+exng+caa, family = binomial, data = heart_sel)
 summary(mod1)
 ```
-
-
 ```{r}
 
 # Càlcul de les OR (Odds-Ràtio)
@@ -317,4 +347,43 @@ exp(coefficients(mod1))
 
 ```
 
+Hem generat una regresió logística utilitzant com a variables independents l'edat, la presió arterial, els nivells de colesterol i vasos calcificats com a variables continues i  glucosa elevada, el sexe, angina o dolor durant esforç i alteracions del ECG com a variables discretes.
+Com a variable target hem utilitzat outcome que es dicotomica i representa  percentatge d'obstrucció de les artèries coronaries més o menys de 50%. A partir del 50% es considera un risc molt elevat de patir un infart de miocardi per obstrucció.
+El motiu de la regressió és veure quines son les variables més importants a la hora de predir el risc d'infart de miocardi. 
+Un seguit de variables han resultat significatives i per tant amb incidència sobre la predicció del resultat. Son les següents:
+Edat, Sexe, Dolor anginós en l'esforç i Nombre d'arteries coronaries calcificades. 
+
+Certament la interpretació mèdica d'aquests resultats és difícil ja que son contra intuitius:
+
+
+- EDAT:Al augmentar l'edat sembla que hi ha un mínim factor protector ja el odds (obtingut al exponenciar el log(odds)) li confereix un descens del 4% per any de l'individu. Aquest resultat no s'ajusta a la realitat de la població general. Però pot ser que al ser el dataset de pacients que tenen simptomatologia compatible amb cardiopatia isquèmica, la gent més gran tingui més possibles diagnòstics diferencials al tenir potencialment més malalties.
+
+- SEXE: En aquesta regressió tenir el sexe masculí rebaixa un 80%(odds ratio 0.2) les probabilitats de tenir malaltia coronària respecte al sexe femení. Novament aquest resultat no s'ajusta a la població general on hi ha més incidència d'infarts en homes. Una explicació podria ser que les dones en aquest dataset son més grans però ho descartem ja que a la regressió s'hi inclou la edat per tant aquest possible factor de confusió queda descartat. 
+
+- Tant tenir dolor anginós en l'esforç com tenir les artèries calcificades en una fluoroscopia (avui en dia ja no s'utilitza) en general s'associa a més risc de tenir malaltia coronària. En el cas que ens ocupa sembla que per cada artèria calcificada es redueix un 50% el risc de coronariopatia i tenir dolor a l'exercici reduix un 80% les possibilitats de malaltia coronària respecte a tenir no tenir dolor. 
+
+
+La conclusió es que en el context dels resultats creiem que la població del dataset és molt específica i no s'assembla al comportament general. Amb més dades sobre quina és aquesta població concreta podríem afinar més l'explicació dels resultats. 
+
+
+
+### 5. Representació dels resultats a partir de taules i gràfiques. Aquest apartat es pot respondre al llarg de la pràctica, sense la necessitat de concentrar totes les representacions en aquest punt de la pràctica.
+Les gràfiques estan insertades dintre de cada apartat del document. 
+
+
+### 6. Resolució del problema. A partir dels resultats obtinguts, quines són les conclusions? Els resultats permeten respondre al problema?
+
+
+Els comenetaris sobre resultats i conclusions  estan insertades dintre de cada apartat del document. 
+
+
+
+
+```{r}
+# Creació d'un document csv amb el dataset transformat.
+
+
+write.csv(heart_sel, "heart_transformed.csv", row.names=FALSE)
+
+```
 
