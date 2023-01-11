@@ -3,6 +3,7 @@ A repository to analyze symptoms and signs of coronary heart disease
 
 Autors:
 Xavier Borrat
+
 Roger Álvarez
 
 Descripció d’arxius que composen el repositori:
@@ -24,4 +25,4 @@ Descripció d’arxius que composen el repositori:
 
 Video link:
 
-TBC
+https://drive.google.com/file/d/1Kdmg_rWSzNnb2NM_Rjk1qEMCCnIPUNBE/view
