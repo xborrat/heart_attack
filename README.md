@@ -25,4 +25,4 @@ Descripció d’arxius que composen el repositori:
 
 Video link:
 
-https://drive.google.com/file/d/1Kdmg_rWSzNnb2NM_Rjk1qEMCCnIPUNBE/view
+https://drive.google.com/file/d/1ezqtq_ecaOiBYTAPf4oW0AZfQCJX4qwA/view
